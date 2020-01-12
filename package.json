@@ -1,0 +1,17 @@
+{
+  "name": "hw_12",
+  "version": "1.0.0",
+  "description": "",
+  "main": "assets/javascripts/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^13.1.6"
+  },
+  "dependencies": {
+    "rxjs": "^6.5.4"
+  }
+}
