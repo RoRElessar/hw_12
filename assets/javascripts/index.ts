@@ -1,6 +1,6 @@
 // @ts-ignore
-import Toast from './toast.min';
-import * as rxjs from 'rxjs';
+import { Toast } from './toast.min';
+import { from } from 'rxjs';
 
 (function () {
 
@@ -8,6 +8,13 @@ import * as rxjs from 'rxjs';
     getAllUsers: string,
     getUserPosts: string,
     getPostComments: string
+  }
+
+  interface Post {
+    userId: number;
+    id: number;
+    title: string;
+    body: string;
   }
 
   const endpoints: Endpoints = {
@@ -22,15 +29,15 @@ import * as rxjs from 'rxjs';
   const postCommentsList = document.getElementById('post-comments');
 
   getAllUsersButton.addEventListener('click', function (e) {
-    serverCall(endpoints.getAllUsers)
+    from(serverCall(endpoints.getAllUsers)
       .then(
-        (response: string) => {
+        (response: any) => {
           let users = JSON.parse(response);
 
           createList(allUsers, users, 'user')
         },
-        error => console.log(error)
-      );
+        (error: string) => console.log(error)
+      ));
     e.preventDefault()
   });
 
@@ -42,22 +49,22 @@ import * as rxjs from 'rxjs';
       (<HTMLTextAreaElement>e.target).classList.add('active');
       removeActiveClass(users, (<HTMLTextAreaElement>e.target));
 
-      serverCall(endpoints.getUserPosts + userId)
+      from(serverCall(endpoints.getUserPosts + userId)
         .then(
-          (response: string) => {
+          (response: any) => {
             const userPosts = JSON.parse(response);
 
             createList(userPostsList, userPosts, 'post');
 
-            userPosts.forEach(function (post) {
+            userPosts.forEach(function (post: Post) {
               const userPost = document.querySelectorAll('.post[data-id="' + post.id + '"]')[0];
               let spinner = document.createElement('div');
               spinner.className = 'spin';
               userPost.appendChild(spinner);
 
-              serverCall(endpoints.getPostComments + post.id)
+              from(serverCall(endpoints.getPostComments + post.id)
                 .then(
-                  (success: string) => {
+                  (success: any) => {
                     const serverResponse = JSON.parse(success);
                     const postsCount = serverResponse.length;
                     const postItem = document.querySelectorAll('.post[data-id="' + serverResponse[0].postId + '"]')[0];
@@ -67,11 +74,11 @@ import * as rxjs from 'rxjs';
                     badge.innerText = postsCount;
                     postItem.appendChild(badge)
                   }, error => console.log(error)
-                )
+                ))
             })
           },
           error => console.log(error)
-        )
+        ))
     } else if (e.target && (<HTMLTextAreaElement>e.target).className === 'list-group-item post') {
       const posts = document.getElementsByClassName('post');
       const postId = (<HTMLTextAreaElement>e.target).getAttribute('data-id');
@@ -79,19 +86,19 @@ import * as rxjs from 'rxjs';
       (<HTMLTextAreaElement>e.target).classList.add('active');
       removeActiveClass(posts, (<HTMLTextAreaElement>e.target));
 
-      serverCall(endpoints.getPostComments + postId)
+      from(serverCall(endpoints.getPostComments + postId)
         .then(
-          (response: string) => {
+          (response: any) => {
             const postComments = JSON.parse(response);
 
             createList(postCommentsList, postComments, 'comment')
           },
           error => console.log(error)
-        )
+        ))
     }
   });
 
-  function serverCall(url) {
+  function serverCall(url: string) {
 
     return new Promise(function (resolve, reject) {
       let xhr = new XMLHttpRequest();
@@ -123,7 +130,7 @@ import * as rxjs from 'rxjs';
     })
   }
 
-  function createList(elementsList, data, type) {
+  function createList(elementsList: any, data: any, type: string) {
     let className: string;
     switch (type) {
       case 'user':
@@ -138,7 +145,7 @@ import * as rxjs from 'rxjs';
     }
 
     elementsList.innerHTML = '';
-    data.forEach(function (element) {
+    data.forEach(function (element: any) {
       let listElement = document.createElement('li');
       listElement.className = className;
       listElement.innerText = type === 'post' ? element.title : element.name;
@@ -147,7 +154,7 @@ import * as rxjs from 'rxjs';
     })
   }
 
-  function removeActiveClass(elementsList, currentElement) {
+  function removeActiveClass(elementsList: any, currentElement: any) {
     for (let i = 0; i < elementsList.length; i++) {
       if (elementsList[i] !== currentElement) {
         elementsList[i].classList.remove('active')
